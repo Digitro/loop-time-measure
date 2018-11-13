@@ -71,7 +71,7 @@ code B:0.046937s
 ---
 * **pause(id)**
 
-    Alias to *stop*
+    Alias to **stop**
 ---
 * **reset(id)**
 
