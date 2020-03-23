@@ -49,6 +49,36 @@ code B:0.046937s
 ```
 ### As decorator:
 ```python
+from loop_time_measure import measureFunctionTime, reportFunctionsTimes
+
+@measureFunctionTime
+def myFunction(n):
+    for j in range(n):
+        print('Time consumming code')
+
+@measureFunctionTime
+def myOtherFunction(n, text):
+    for j in range(n):
+        print(text)
+
+myFunction(100)
+myOtherFunction(50, 'Other text')
+reportFunctionsTimes()
+```
+Output:
+```
+Time consumming code
+Time consumming code
+(...)
+Time consumming code
+(...)
+Other text
+Other text
+(...)
+Other text
+myFunction:0.000470s
+myOtherFunction:0.000196s
+
 ```
 ## Documentation
 
@@ -83,7 +113,14 @@ code B:0.046937s
 * **report([sort])**
 
     Print a report of all meters. The parameter **sort** indicates the sort criteria to be used to determine the meters print order. The default is **"time"**, to sort by descending meters values. The alternative is **"id"**, to sort by the id strings.
+### Decorator
+* @measureFunctionTime
 
+Wraps a function in a time measurement
+### Function
+* reportFunctionsTimes(sort = 'time')
+
+Report the measured time on all decorated functions
 ## Author
 * Sergio Schmiegelow
 * sergio.schmiegelow@gmail.com
