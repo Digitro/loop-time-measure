@@ -3,8 +3,8 @@ import loop_time_measure
 ltm = loop_time_measure.loopTimeMeasureClass()
 
 ltm.start('Total time')
-for i in range(200):
 
+for i in range(200):
     ltm.start('code A')
     for j in range(100):
         print('Time consumming code A')

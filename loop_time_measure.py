@@ -75,6 +75,7 @@ class loopTimeMeasureClass:
         self.lock.release()
 #-------------------------------------------------------------------------
     def report(self, sort = 'time'):
+        '''Show all the accumulated times'''
         self.lock.acquire()
         if sort == 'time':
             sortedTimeMeters = sorted(self.timeMetersDict.items(), key=lambda x: x[1][1], reverse = True)
@@ -83,3 +84,18 @@ class loopTimeMeasureClass:
         for element in sortedTimeMeters:
             print ("%s:%fs"%(element[0], element[1][1]))
         self.lock.release()
+#-------------------------------------------------------------------------
+# DECORATOR
+#-------------------------------------------------------------------------
+#create a time measurement object of all decorated functions
+decoratedFunctionsObject = loopTimeMeasureClass()
+#-------------------------------------------------------------------------
+def measureFunctionTime(func):
+    def function_wrapper(*args, **kwargs):
+        decoratedFunctionsObject.start(func.__name__)
+        func(*args, **kwargs)
+        decoratedFunctionsObject.stop(func.__name__)
+    return function_wrapper
+#-------------------------------------------------------------------------
+def reportFunctionsTimes(sort = 'time'):
+    decoratedFunctionsObject.report(sort)

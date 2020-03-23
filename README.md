@@ -18,6 +18,7 @@ The **report** method prints the amount of time of all ids.
 * threading
 
 ## Usage example:
+### As functions:
 ```python
 import loop_time_measure
 
@@ -45,7 +46,9 @@ Output:
 Total time:0.141112s
 code A:0.092167s
 code B:0.046937s
-
+```
+### As decorator:
+```python
 ```
 ## Documentation
 
