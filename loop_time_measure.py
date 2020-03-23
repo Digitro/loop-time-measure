@@ -3,8 +3,10 @@ import time
 import threading
 import sys
 import math
+import functools
+
 try:
-    import numpy
+    import numpy as np
     NUMPY = True
 except:
     NUMPY = False
@@ -105,84 +107,98 @@ class loopTimeMeasureClass:
             timeMeter[1] = []
         self.lock.release()
 #-------------------------------------------------------------------------
-    def report(self, sortMode = 'time'):
+    def report(self, sortMode = 'time', reverse = True):
         '''Show all the accumulated times'''
         self.lock.acquire()
         if self.mode == 'timeSum':
             if sortMode == 'time':
-                sortedTimeMeters = sorted(self.timeMetersDict.items(), key=lambda x: x[1][1], reverse = True)
+                sortedTimeMeters = sorted(self.timeMetersDict.items(), key=lambda x: x[1][1], reverse = reverse)
             elif sortMode == 'id':
                 sortedTimeMeters = sorted(self.timeMetersDict.items(), key=lambda x: x)
             else:
-                print("Error: sortMode must be 'id' or 'time'")
+                print("Error: sortMode must be 'id' or 'time'. Using 'time'")
+                sortedTimeMeters = sorted(self.timeMetersDict.items(), key=lambda x: x[1][1], reverse = reverse)
             for element in sortedTimeMeters:
                 print ("%s:%fs"%(element[0], element[1][1]))
         else: #stats
             if NUMPY:
-                sumFunc, avgFunc, minFunc, maxFunc, stdFunc = sum, internalAvg, min, max, internalStdev
+                sumFunc, avgFunc, minFunc, maxFunc, stdFunc = sum, internalAverage, min, max, internalStdev
             else:
                 sumFunc, avgFunc, minFunc, maxFunc, stdFunc = np.sum, np.mean, np.min, np.max, np.std
-            idsList = self.timeMetersDict.keys()
+            idsList = list(self.timeMetersDict.keys())
             sumsList   = []
             avgsList  = []
             minsList   = []
             maxsList   = []
             stdevsList = []
             numSamplesList = []
-            if id in idsList:
+            for id in idsList:
                 if NUMPY:
                     timeArray = np.array(self.timeMetersDict[id][1])
                 else:
                     timeArray = self.timeMetersDict[id][1]
-                sumsList.append(sumFunc(timeArray))
-                avgsList.append(avgFunc(timeArray))
-                minsList.append(minFunc(timeArray))
-                maxsList.append(maxFunc(timeArray))
-                stdevsList.append(stdFunc(timeArray))
-                numSamplesList.append(len(timeArray))
-            joinedList = zip(idList, sumsList, avgsList, minsList, maxsList, stdevsList, numSamplesList)
+                if len(timeArray) > 0:
+                    sumsList.append(sumFunc(timeArray))
+                    avgsList.append(avgFunc(timeArray))
+                    minsList.append(minFunc(timeArray))
+                    maxsList.append(maxFunc(timeArray))
+                    stdevsList.append(stdFunc(timeArray))
+                    numSamplesList.append(len(timeArray))
+                else:
+                    sumsList.append(float('NaN'))
+                    avgsList.append(float('NaN'))
+                    minsList.append(float('NaN'))
+                    maxsList.append(float('NaN'))
+                    stdevsList.append(float('NaN'))
+                    numSamplesList.append(0)
+            joinedList = zip(idsList, sumsList, avgsList, minsList, maxsList, stdevsList, numSamplesList)
             try:
                 sortIndex = ['id', 'time', 'average', 'min', 'max', 'stdev', 'num_samples'].index(sortMode)
             except:
                 print("Error: sortMode must be 'id', 'time', 'average', 'min', 'max', 'stdev' or 'num_samples'")
-                sortIndex = None
-            if sortIndex is not None:
-                joinedList = sorted(joinedList, key=lambda x: x[sortIndex], reverse = True)
+                sortIndex = 1
+            joinedList = sorted(joinedList, key=lambda x: x[sortIndex], reverse = reverse)
             print("id, total_time, average_time, min_time, max_time, std_time, num_samples")
             for idLine in joinedList:
-                print("%s, %f, %f, %f, %f, %f, %d"%idLine[i])
+                print("%s, %f, %f, %f, %f, %f, %d"%idLine)
         print("")
 
         self.lock.release()
 #-------------------------------------------------------------------------
 # DECORATOR
 #-------------------------------------------------------------------------
-#create a time measurement object of all decorated functions
-decoratedFunctionsObject = loopTimeMeasureClass()
+decoratedFunctionsObject = None
 #-------------------------------------------------------------------------
-def measureFunctionTime(func):
-    def function_wrapper(*args, **kwargs):
-        decoratedFunctionsObject.start(func.__name__)
-        func(*args, **kwargs)
-        decoratedFunctionsObject.stop(func.__name__)
-    return function_wrapper
+def measureFunctionTime(timeFunction = 'clock', mode = 'timeSum'):
+    def decorator(function):
+        @functools.wraps(function)
+        def wrapper(*args, **kwargs):
+            global decoratedFunctionsObject
+            if decoratedFunctionsObject is None:
+                decoratedFunctionsObject = loopTimeMeasureClass(timeFunction, mode)
+            decoratedFunctionsObject.start(function.__name__)
+            result = function(*args, **kwargs)
+            decoratedFunctionsObject.stop(function.__name__)
+            return result
+        return wrapper
+    return decorator
 #-------------------------------------------------------------------------
-def reportFunctionsTimes(sort = 'time'):
-    decoratedFunctionsObject.report(sort)
+def reportFunctionsTimes(sortMode = 'time'):
+    decoratedFunctionsObject.report(sortMode)
 #-------------------------------------------------------------------------
 # Statistical functions in case of numpy is missing
 #-------------------------------------------------------------------------
-def internalAvg(timelist):
+def internalAverage(timeList):
     if len(timeList) == 0:
         return 0
-    return internalAverage(timeList) / float(len(timeList))
+    return sum(timeList) / float(len(timeList))
 #-------------------------------------------------------------------------
-def internalStdev(timelist):
+def internalStdev(timeList):
     if len(timeList) < 2:
         return 0
-    avg = internalAvg(timeList)
+    avg = internalAverage(timeList)
     sumOfSquares = 0
-    for timeSample in timelist:
+    for timeSample in timeList:
         sumOfSquares += (timeSample - avg) ** 2
     return math.sqrt(sumOfSquares / (len(timeList -1)))
 #-------------------------------------------------------------------------

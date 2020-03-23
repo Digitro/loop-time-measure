@@ -1,15 +1,23 @@
 from loop_time_measure import measureFunctionTime, reportFunctionsTimes
 
-@measureFunctionTime
-def myFunction(n):
-    for j in range(n):
-        print('Time consumming code')
+@measureFunctionTime(mode = 'stats') #the first decorator rules the parameters
+def myFunction():
+    print('Time consumming code')
 
-@measureFunctionTime
-def myOtherFunction(n, text):
-    for j in range(n):
-        print(text)
+@measureFunctionTime()
+def myOtherFunction(text):
+    text = text[::-1] #bogus processing
+    print(text)
+    return text
 
-myFunction(100)
-myOtherFunction(50, 'Other text')
+for i in range(25):
+    myFunction()
+
+for i in range(50):
+    res = myOtherFunction('Other text')
+    print("res =", res)
+
+print("-----------------")
+print("Time statistics:")
+print("-----------------")
 reportFunctionsTimes()
