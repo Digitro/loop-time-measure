@@ -16,6 +16,8 @@ The **report** method prints the amount of time of all ids.
 ## Dependencies
 * time
 * threading
+* sys
+* numpy (or math)
 
 ## Usage example:
 ### As functions:
