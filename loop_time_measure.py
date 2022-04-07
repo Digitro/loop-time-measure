@@ -14,16 +14,16 @@ except:
 class loopTimeMeasureClass:
     '''Class to measure code segments execution time in loops'''
 #-------------------------------------------------------------------------
-    def __init__(self, timeFunction='clock', mode = 'timeSum'):
+    def __init__(self, timeFunction='process_time', mode = 'timeSum'):
         self.lock = threading.Lock()
         self.lock.acquire()
         self.timeMetersDict = {}
-        if timeFunction == 'clock':
-            self.timeFunction = time.clock
+        if timeFunction == 'process_time':
+            self.timeFunction = time.process_time
         elif timeFunction == 'time':
             self.timeFunction = time.time
         else:
-            print ("Error: timeFunction must be 'clock' or 'time'")
+            print ("Error: timeFunction must be 'process_time' or 'time'")
             self.lock.release()
             sys.exit(1)
         if mode in ['timeSum', 'stats']:
@@ -169,7 +169,7 @@ class loopTimeMeasureClass:
 #-------------------------------------------------------------------------
 decoratedFunctionsObject = None
 #-------------------------------------------------------------------------
-def measureFunctionTime(timeFunction = 'clock', mode = 'timeSum'):
+def measureFunctionTime(timeFunction = 'process_time', mode = 'timeSum'):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):

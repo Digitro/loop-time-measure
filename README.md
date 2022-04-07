@@ -10,7 +10,6 @@ The **getTime** method can be used the get the current amount of time (or the li
 The **report** method prints the amount of time of all ids.
 
 ## Compatibility
-* Python 2
 * Python 3
 
 ## Dependencies
@@ -112,13 +111,13 @@ myFunction, 0.000308, 0.000012, 0.000010, 0.000041, 0.000006, 25
 ## Documentation
 
 ### Class
-* **loopTimeMeasureClass(timeFunction='clock', mode = 'timeSum')**
+* **loopTimeMeasureClass(timeFunction='process_time', mode = 'timeSum')**
 
     Class for the time measurements. You need only one object for all meters.
 
     The timeFunction parameter selects the function used to get the time.
 
-    * The default timeFunction is **"clock"** ( time.clock() ) and it measures CPU time.
+    * The default timeFunction is **"process_time"** ( time.process_time() ) and it measures CPU time.
 
     * The alternative is **"time"** ( time.time() ), for real time measurement.
 
@@ -158,7 +157,7 @@ myFunction, 0.000308, 0.000012, 0.000010, 0.000041, 0.000006, 25
     * **"num_samples"** - Number of registered times.
 
 ### Decorator
-* @measureFunctionTime(timeFunction='clock', mode = 'timeSum')
+* @measureFunctionTime(timeFunction='process_time', mode = 'timeSum')
 
 Wraps a function in a time measurement
 
